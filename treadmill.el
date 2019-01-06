@@ -154,6 +154,8 @@ if a package file is found."
         ((not (buffer-file-name))
          (warn "No module name for Gerbil unsaved buffer")
          treadmill-current-module)
+        ;; For Org-mode, use whatever the REPL has
+        (org-src-mode treadmill-current-module)
         (t (let* ((fname (buffer-file-name))
                   (module-leaf (file-name-sans-extension
                                 (file-name-nondirectory fname)))
@@ -162,7 +164,8 @@ if a package file is found."
                                (list module-leaf) fdir)))
                  (progn (setq treadmill-current-module module)
                         module)
-               (warn "No package file name for Gerbil source"))))))
+               (prog1 treadmill-current-module
+                 (warn "No package file name for Gerbil source")))))))
 
 (defun treadmill--gxi-location ()
   "Return location of `gxi' command, the Gerbil interpreter.
@@ -519,9 +522,9 @@ a no-value result hangs this procedure."
 
 (defun treadmill--module-string (mod)
   "Return module string for MOD suitable for use by evaluation procedures."
-  (cond ((eq mod -1) "#f")
-        ((null mod) "#f")
-        (t (format "'%s" mod))))
+  (if (or (eq mod -1) (null mod))
+      "#f"
+    (format "'%s" mod)))
 
 (defun treadmill-eval-io-async (expr-string input-string module completion)
   "Evaluate EXPR-STRING with INPUT-STRING as standard input.
