@@ -159,7 +159,9 @@ if a package file is found."
          (warn "No module name for Gerbil unsaved buffer")
          treadmill-current-module)
         ;; For Org-mode, use whatever the REPL has
-        (org-src-mode treadmill-current-module)
+        (org-src-mode
+         (with-current-buffer treadmill-current-interaction-buffer
+           treadmill-current-module))
         (t (let* ((fname (buffer-file-name))
                   (module-leaf (file-name-sans-extension
                                 (file-name-nondirectory fname)))
